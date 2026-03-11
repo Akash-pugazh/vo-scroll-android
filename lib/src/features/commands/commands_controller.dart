@@ -29,12 +29,20 @@ class CommandsController extends AsyncNotifier<List<VoiceCommand>> {
   }
 
   Future<void> addCommand(String phrase) async {
+    final normalized = phrase.trim();
+    if (normalized.isEmpty) return;
+
     final current = state.value ?? <VoiceCommand>[];
+    final exists = current.any(
+      (command) => command.phrase.toLowerCase() == normalized.toLowerCase(),
+    );
+    if (exists) return;
+
     final next = [
       ...current,
       VoiceCommand(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        phrase: phrase.trim(),
+        phrase: normalized,
         action: 'scroll_next',
       ),
     ];

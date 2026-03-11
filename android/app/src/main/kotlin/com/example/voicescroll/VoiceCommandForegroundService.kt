@@ -28,6 +28,7 @@ class VoiceCommandForegroundService : Service(), RecognitionListener {
                 updateCommandPhrases(intent)
                 startListening()
             }
+
             ACTION_STOP -> stopSelf()
         }
         return START_STICKY
@@ -40,19 +41,14 @@ class VoiceCommandForegroundService : Service(), RecognitionListener {
     }
 
     private fun updateCommandPhrases(intent: Intent) {
-        val rawCommands = intent.getSerializableExtra("commands")
-        val maps = rawCommands as? ArrayList<HashMap<String, Any>>
-        if (maps.isNullOrEmpty()) {
-            commandPhrases = setOf("next", "okay")
-            return
-        }
+        val phrases = intent
+            .getStringArrayListExtra(EXTRA_PHRASES)
+            ?.map { it.trim().lowercase() }
+            ?.filter { it.isNotBlank() }
+            ?.toSet()
+            .orEmpty()
 
-        commandPhrases = maps
-            .mapNotNull { it["phrase"] as? String }
-            .map { it.trim().lowercase() }
-            .filter { it.isNotBlank() }
-            .toSet()
-            .ifEmpty { setOf("next", "okay") }
+        commandPhrases = phrases.ifEmpty { setOf("next", "okay") }
     }
 
     private fun startListening() {
@@ -169,6 +165,7 @@ class VoiceCommandForegroundService : Service(), RecognitionListener {
     companion object {
         const val ACTION_START = "voice_scroll.action.START"
         const val ACTION_STOP = "voice_scroll.action.STOP"
+        const val EXTRA_PHRASES = "phrases"
         const val CHANNEL_ID = "voice_scroll_bg"
         const val NOTIFICATION_ID = 101
     }
