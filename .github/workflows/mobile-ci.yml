@@ -13,6 +13,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Regenerate Android host files for current Flutter
+        run: flutter create --platforms=android .
       - name: Install deps
         run: flutter pub get
       - name: Analyze
